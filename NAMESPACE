@@ -1,0 +1,2 @@
+export(gcwm)
+import(numDeriv,mnormt,mclust,ellipse,mixture,Flury)
