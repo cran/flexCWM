@@ -1,11 +1,11 @@
-\name{gcwm}
-\alias{gcwm}
-\title{Flexible Cluster-Weighted Modeling}
-\description{Run the Generalized Linear Gaussian  Cluster-Weighted Model }
+\name{glmcwm}
+\alias{glmcwm}
+\title{Fit for the Generalized Linear Mixed CWM}
+\description{Maximum likelihood fitting of the Generalized Linear Mixed Cluster-Weighted Model by using the EM algorithm.}
 \usage{
-gcwm (Y, X, familyY="Gaussian", k=2, ic=c("BIC", "AIC", "ICL"), mY=1, 
-  method="Nelder-Mead", initialization="random.soft", start.z=NULL, 
-  iter.max=1000, threshold=1.0e-04, loglikplot=FALSE, seed=NULL)              
+glmcwm (Y, Xcont=NULL, Xcate=NULL, m=NULL, familyY="Gaussian", k=2, 
+  mY=1, method="Nelder-Mead", initialization="random.soft", start.z=NULL, 
+  iter.max=1000, threshold=1.0e-04,loglikplot, seed=NULL)              
 }
                  
 %- maybe also 'usage' for other objects documented here.
@@ -13,8 +13,14 @@ gcwm (Y, X, familyY="Gaussian", k=2, ic=c("BIC", "AIC", "ICL"), mY=1,
    \item{Y}{
   numerical vector for the response variable.
   }
-  \item{X}{
-  matrix for the covariates. 
+  \item{Xcont}{
+  matrix for the continuous covariates. 
+  }
+    \item{Xcate}{
+  matrix for the categorical covariates. 
+  }
+    \item{m}{
+   number of levels for each categorical variable in Xcate (starting by 1).
   }
   \item{ familyY}{
   the exponential distribution used for Y|x in each cluster; it can be: 
@@ -29,13 +35,6 @@ gcwm (Y, X, familyY="Gaussian", k=2, ic=c("BIC", "AIC", "ICL"), mY=1,
 
   \item{k}{
   a vector containing the numbers of clusters to be tried. The one with the lowest information criterion is selected. Default value is 2.
-  }
-  \item{ic}{the information criteria by which the best model is selected when \code{lencgth(k)>1}. Possible values are
-    \itemize{
-      \item \code{"BIC"} 
-      \item \code{"AIC"} 
-      \item \code{"ICL"}
-    }
   }
   \item{mY}{
   When \code{familyY="Binomial"}, it sets the sample size. Default value is 1 (Bernoulli distribution).
@@ -74,7 +73,7 @@ gcwm (Y, X, familyY="Gaussian", k=2, ic=c("BIC", "AIC", "ICL"), mY=1,
 This function returns a list of values related to the model selected. It contains:
 
 \item{Y}{response variable}
-\item{X}{covariates}
+\item{Xcont,Xcate}{covariates}
 \item{familyY}{exponential distribution used for Y|x in each cluster}
 \item{p}{number of covariates}
 \item{k}{number of groups}
@@ -96,9 +95,7 @@ This function returns a list of values related to the model selected. It contain
 \item{z}{matrix of posterior probabilities}
 \item{group}{classification vector}
 \item{loglik}{final log-likelihood value}
-\item{AIC}{}
-\item{BIC}{}
-\item{ICL}{}
+\item{"AIC", "AICc", "AICu", "AIC3", "AWE", "BIC", "CAIC", "ICL"}{Information criteria}
 \item{call}{an object of class \code{call}}
 }
 
@@ -111,7 +108,7 @@ modeling. \emph{arXiv.org} e-print \bold{1211.1171}, available at: http://arxiv.
 McCullagh, P. and Nelder, J. (1989). Generalized Linear Models. Chapman & Hall, Boca Raton, 2nd edition
 }
 \author{
-Incarbone G., Mazza A., Punzo A., Ingrassia S.
+Mazza A., Punzo A., Ingrassia S.
 }
 %%\note{
 %%  ~~further notes~~
@@ -126,9 +123,6 @@ Incarbone G., Mazza A., Punzo A., Ingrassia S.
 data(tourism)
 Y <- tourism$overnights
 X <- tourism$attendance
-res <- gcwm(Y=Y,X=X,k=1:4,seed=1)
-plot(cbind(Y,X),col=res$best$group)
-
-
+res <- glmcwm(Y=Y,Xcont=X,k=1:4,seed=1)
 }
 

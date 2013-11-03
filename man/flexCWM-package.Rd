@@ -2,7 +2,7 @@
 \alias{flexCWM-package}
 \alias{flexCWM}
 \docType{package}
-\title{flexCWM - Flexible Cluster Weighted Models.}
+\title{flexCWM - Flexible Cluster Weighted Modeling}
 \description{
 This package allows for Flexible Cluster Weighted Modeling.
 }
@@ -23,7 +23,7 @@ modeling. \emph{arXiv.org} e-print \bold{1211.1171}, available at: http://arxiv.
 
 }
 \author{
-Incarbone G., Mazza A., Punzo A., Ingrassia S.
+Mazza A., Punzo A., Ingrassia S.
 
 Maintainer: Mazza Angelo <a.mazza@unict.it>
 }
@@ -34,5 +34,5 @@ Maintainer: Mazza Angelo <a.mazza@unict.it>
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{gcwm}}, \code{\link{tourism}}
+\code{\link{glmcwm}}, \code{\link{tourism}}
 }

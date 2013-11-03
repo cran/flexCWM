@@ -1,7 +1,7 @@
-b140f3669b68c6904bf344e5635d32ec *DESCRIPTION
-064b4f09c2fd76226a7fe73de985d233 *NAMESPACE
-37fc9c5e61696c81732ac4b67f9d0ac5 *R/code.R
+850f194406cd5bbd699b57dd28c7d4db *DESCRIPTION
+09b7a0f10c80d32fd74a3b00728ee0bd *NAMESPACE
+aa5ed84f8628d33f2a72eef4a7ea63cd *R/code.R
 a4b03cbd2110f22acb2ecb0b4e167892 *data/tourism.RData
-09437f3ce2690ce8c4f78fa74482f2e9 *man/flexCWM-package.Rd
-bdb4d452b5306e6476ad9aef59d20216 *man/gcwm.Rd
-2b24761626e2bc3c6e49b360920b18fc *man/tourism.Rd
+686c3cedce1a75b6eec74cc0cfa78b1a *man/flexCWM-package.Rd
+8a08760fb7a6966997690fbbba343b69 *man/glmcwm.Rd
+2ca7a36f3f3957384acadca48dcd1a79 *man/tourism.Rd

@@ -12,6 +12,131 @@ class <- function(groups,k){
   
 }
 
+########################################
+## Converter for the categorical data ##
+########################################
+
+converter <- function(X,m=NULL){
+  
+  # X: matrix of integers (having the variables by column)
+  # m: number of levels for each categorical variable (starting by 1)
+  
+  if(is.null(X))     stop('Hey, we need some data, please! X is null')
+  if(!is.matrix(X))  stop('X needs to be in matrix form')
+  #if(!is.numeric(X)) stop('X is required to be numeric')
+  
+  d <- ncol(X)
+  n <- nrow(X)
+  
+  if(is.null(m)) m <- apply(X,2,max)
+  
+  binary <- NULL
+  
+  for(u in 1:d)
+    binary[[u]] <- class(X[,u],m[u]) 
+  
+  return(
+    list(
+      m = m,
+      binary = binary,
+      d = d,
+      n = n
+    )
+  )
+  
+}
+
+#########################################
+## Re-parameterized Gamma distribution ##
+#########################################
+
+dgam <- function(x,mu,nu,log=FALSE){
+  
+  dgamma(x, shape=nu, scale = mu/nu, log = log)
+  
+}
+
+rgam <- function(x,mu,nu){
+  
+  rgamma(x, shape=nu, scale = mu/nu)
+  
+}
+
+################################
+## Weighted Covariance Matrix ##
+################################
+
+mstep <- function(x,wt){
+  
+  if (is.data.frame(x)) 
+    x <- as.matrix(x)
+  else if (!is.matrix(x)) 
+    stop("'x' must be a matrix or a data frame")
+  if (!all(is.finite(x))) 
+    stop("'x' must contain finite values only")
+  p   <- ncol(x)
+  n   <- nrow(x)
+  mu  <- array(colSums(wt/sum(wt)*x),c(p),dimnames=list(paste("X.",1:p,sep="")))
+  cov <- array(crossprod(sqrt(wt/sum(wt))*(x-matrix(rep(mu,n),n,p,byrow=TRUE))),c(p,p),dimnames=list(paste("X.",1:p,sep=""),paste("X.",1:p,sep="")))
+  return(
+    list(
+      center = mu,
+      cov = cov      
+    )
+  )
+}
+
+#########################
+## Multinomial case: X ##
+#########################
+
+# MultX <- function(X,m=NULL,weights){ #,method="Nelder-Mead",start=FALSE,initial.values=NULL,maxit=1000,reltol=1e-15,trace=1
+#   
+#   # X: matrix of integers (having the variables by column)
+#   # m: number of levels for each categorical variable (starting by 1)
+#   # weights: a numerical vector of weights the same length as X giving the weights to use for elements of X.
+#   
+#   temp <- converter(X=X,m=m)
+#   
+#   n      <- temp$n
+#   d      <- temp$d
+#   m      <- temp$m
+#   binary <- temp$binary
+#   
+#   # binary matrix creation
+#   
+#   Xmod <- binary[[1]]
+#   if(d>1){
+#     for(j in 2:d)
+#       Xmod <- cbind(Xmod,binary[[j]])
+#   }  
+#   
+#   alpha.obs <- colMeans(m)
+#   
+#   alpha.obs  <- weighted.mean(x=X,w=weights)
+#   
+#   f <- function(par,X,weights){
+#     
+#     lambda <- par
+#     
+#     l <- -sum(weights*dpois(x=X, lambda = lambda, log = TRUE))
+#     
+#   }
+#   
+#   res <- optimize(f=f, interval=c(0,2*lambda.obs), X=X, weights=weights)
+#   
+#   loglik     <- -res$objective
+#   lambda.hat<-  res$minimum
+#   
+#   return(
+#     list(
+#       loglik  = loglik,
+#       lambdaX = lambda.hat
+#     )
+#   )  
+#   
+# }
+
 ########################
 ## Gaussian case: Y|x ## 
 ########################
@@ -71,7 +196,7 @@ GaussianY <- function(Y,X,weights,method="Nelder-Mead",start=FALSE,initial.value
 ## Poisson case: Y|x ## 
 #######################
 
-PoissonY <- function(Y,X,weights,method="Nelder-Mead",start=FALSE,initial.values=NULL,maxit=1000,reltol=1e-15,trace=1){ 
+PoissonY <- function(Y,X,weights,method="Nelder-Mead",start=FALSE,initial.values=NULL,maxit=1000,reltol=1e-15,trace=0){ 
   
   # Y: a numerical vector for the response variable
   # X: a numerical vector for the unique covariate
@@ -81,7 +206,7 @@ PoissonY <- function(Y,X,weights,method="Nelder-Mead",start=FALSE,initial.values
   
   if(start==FALSE){
     
-    modelY      <- glm(Y ~ X,family=poisson(),weights=weights,control=list(trace=TRUE,epsilon=1e-14)) 
+    modelY      <- glm(Y ~ X,family=poisson(),weights=weights,control=list(trace=FALSE,epsilon=1e-14)) 
     beta.obs    <- modelY$coefficients
     
     starting.values <- c(beta.obs)
@@ -122,7 +247,7 @@ PoissonY <- function(Y,X,weights,method="Nelder-Mead",start=FALSE,initial.values
 ## Binomial case: Y|x ## 
 ########################
 
-BinomialY <- function(Y,X,weights,m,method="Nelder-Mead",start=FALSE,initial.values=NULL,maxit=1000,reltol=1e-15,trace=1){ 
+BinomialY <- function(Y,X,weights,m,method="Nelder-Mead",start=FALSE,initial.values=NULL,maxit=1000,reltol=1e-15,trace=0){ 
   
   # Y: a numerical vector for the response variable
   # X: a numerical vector for the unique covariate
@@ -132,7 +257,7 @@ BinomialY <- function(Y,X,weights,m,method="Nelder-Mead",start=FALSE,initial.val
   
   if(start==FALSE){
     
-    modelY   <- glm(cbind(Y,m-Y) ~ X,family=binomial(),weights=weights,control=list(trace=TRUE,epsilon=1e-14)) 
+    modelY   <- glm(cbind(Y,m-Y) ~ X,family=binomial(),weights=weights,control=list(trace=FALSE,epsilon=1e-14)) 
     beta.obs <- modelY$coefficients
     
     starting.values <- c(beta.obs)
@@ -183,7 +308,7 @@ GammaY <- function(Y,X,weights,method="Nelder-Mead",start=FALSE,initial.values=N
   
   if(start==FALSE){
     
-    modelY    <- glm(Y ~ X,family=Gamma(link="log"),weights=weights,control=list(trace=TRUE,epsilon=1e-14)) 
+    modelY    <- glm(Y ~ X,family=Gamma(link="log"),weights=weights,control=list(trace=FALSE,epsilon=1e-14)) 
     beta.obs  <- modelY$coefficients
     nu.obs    <- 1/summary(modelY)$dispersion
     
@@ -228,12 +353,12 @@ GammaY <- function(Y,X,weights,method="Nelder-Mead",start=FALSE,initial.values=N
 ## Generalized CWM ##
 #####################
 
-
-
-glgcwm <- function(
+glmcwm2 <- function(
 	Y,			                 # numerical vector for the response variable
-  X,			                 # (nxp) matrix for the covariates
-  familyY = "Gaussian",    # the exponential distribution used for Y|x 
+  Xcont=NULL,			                 # (nxp) matrix for the continuous covariates
+	Xcate=NULL,  		                 # (nxd) matrix for the categorical covariates
+  m=NULL,                  # m: number of levels for each categorical variable in Xcate (starting by 1)
+	familyY = "Gaussian",    # the exponential distribution used for Y|x 
 	k=2,                     # number of groups
 	mY=1,                         # mY=1 for Bernoulli; mY>1 for Binomial
 	method="Nelder-Mead",         # optimization method
@@ -246,33 +371,74 @@ glgcwm <- function(
   )
 {
   
-X <- as.matrix(X)
-n <- length(Y)  # sample size
-p <- ncol(X)    # number of variables for X
-  
-  if(is.null(X))     stop('Hey, we need some data, please! X is null')
-  if(!is.matrix(X))  stop('X needs to be in matrix form')
-  if(!is.numeric(X)) stop('X is required to be numeric')
-  if(n == 1)   stop('nrow(X) is equal to 1')
-  if(any(is.na(X)))  stop('No NAs allowed.')
-  if(is.null(k)) stop('k is NULL')
+  if(is.null(Xcont) & is.null(Xcate)) 
+    stop('Hey, we need some data, please!')
+  if(!is.numeric(Xcont) & !is.null(Xcont)) 
+    stop('Xcont is required to be numeric')
+  if(!is.numeric(Xcate) & !is.null(Xcate)) 
+    stop('Xcate is required to be numeric')
+  n <- length(Y)    # sample size
+  if(n == 1)   
+    stop('Hey, we need more than one observation, please!')
+  #if(any(is.na(Xcont)) & !is.null(Xcont))  
+    #stop('No NAs allowed in Xcont.')
+  #if(any(is.na(Xcate)) & !is.null(Xcate))  
+    #stop('No NAs allowed in Xcate.')
+  if(is.null(k)) 
+    stop('k is NULL')
   k <- as.integer(ceiling(k))
-  if(!is.integer(k)) stop('k is not a integer')
-  if(any(k < 1)) stop('k is not a positive integer')
+  if(!is.integer(k)) 
+    stop('k is not a integer')
+  if(any(k < 1)) 
+    stop('k is not a positive integer')
+  
+  if(!is.null(Xcont))
+    Xcont <- as.matrix(Xcont)
+  if(!is.null(Xcate))
+    Xcate <- as.matrix(Xcate)
+  X <- cbind(Xcont,Xcate)
+  p <- 0            # number of variables for the continuous part of X
+  d <- 0            # number of variables for the categorical part of X
+  if(!is.null(Xcont))
+    p <- ncol(Xcont)  
+  if(!is.null(Xcate))
+    d <- ncol(Xcate)  
+ 
+  # modification of Xcate in order to apply the multinomial model
+  
+  if(!is.null(Xcate)){
+    temp <- converter(X=Xcate,m=m)
+    Xmod <- temp$binary
+    m    <- temp$m
+  }
+  
+# parameters definition
   
 prior   <- numeric(k) # weights
 
-# X
+# Xcont
 
-muX     <- array(0,c(p,k),dimnames=list(paste("X.",1:p,sep=""),paste("comp.",1:k,sep="")))
-VarX    <- array(0,c(p,p,k),dimnames=list(paste("X.",1:p,sep=""),paste("X.",1:p,sep=""),paste("comp.",1:k,sep="")))
-invVarX <- array(0,c(p,p,k),dimnames=list(paste("X.",1:p,sep=""),paste("X.",1:p,sep=""),paste("comp.",1:k,sep="")))
-PX      <- array(0,c(n,k),dimnames=list(1:n,paste("comp.",1:k,sep="")))
+muX <- VarX <- invVarX <- NULL
+if(!is.null(Xcont)){
+  muX     <- array(0,c(p,k),dimnames=list(paste("X.",1:p,sep=""),paste("comp.",1:k,sep="")))
+  VarX    <- array(0,c(p,p,k),dimnames=list(paste("X.",1:p,sep=""),paste("X.",1:p,sep=""),paste("comp.",1:k,sep="")))
+  invVarX <- array(0,c(p,p,k),dimnames=list(paste("X.",1:p,sep=""),paste("X.",1:p,sep=""),paste("comp.",1:k,sep="")))
+}
+PXcont  <- array(1,c(n,k),dimnames=list(1:n,paste("comp.",1:k,sep="")))
 
+# Xcate
+
+alpha <- NULL
+if(!is.null(Xcate)){
+  for(u in 1:d)
+    alpha[[u]] <- array(0,c(m[u],k),dimnames=list(paste("level.",1:m[u],sep=""),paste("comp.",1:k,sep="")))
+}
+PXcate <- array(1,c(n,k),dimnames=list(1:n,paste("comp.",1:k,sep="")))
+  
 # Y|x
 
 beta0   <- numeric(k)
-beta1   <- array(0,c(p,k),dimnames=list(paste("X.",1:p,sep=""),paste("comp.",1:k,sep="")))
+beta1   <- array(0,c(p+d,k),dimnames=list(paste("X.",1:(p+d),sep=""),paste("comp.",1:k,sep="")))
 dispY   <- numeric(k)   # Conditional Dispersion for each group
 nuY     <- NULL         # only for the Gamma distribution   
 VarFunY <- array(0,c(n,k),dimnames=list(1:n,paste("comp.",1:k,sep="")))
@@ -296,15 +462,17 @@ if(initialization=="kmeans"){
 
 if(initialization=="random.soft"){
 
-  if (!is.null(seed)) set.seed(seed)
+  if(!is.null(seed)) set.seed(seed)
 	z  <- array(runif(n*k),c(n,k)) # soft posterior probabilities (no-normalized) (n x k) 
 	z  <- z/rowSums(z)             # soft posterior probabilities (n x k)
+  
   } 
 
 if(initialization=="random.hard"){
 
-  if (!is.null(seed)) set.seed(seed)
+  if(!is.null(seed)) set.seed(seed)
   z  <- t(rmultinom(n, size = 1, prob=rep(1/k,k)))  # hard posterior probabilities (n x k)
+  
   } 
 
 if(initialization=="manual"){ # z.start can be both soft and hard initialization
@@ -312,6 +480,7 @@ if(initialization=="manual"){ # z.start can be both soft and hard initialization
   z  <- start.z      # posterior probabilities (n x k) no-normalized
 
   } 
+  
 # ------------ #
 # EM algorithm #
 # ------------ #
@@ -337,19 +506,36 @@ while(check<1){
   # ------- #
 
 	prior <- colMeans(z)
+  nj    <- colSums(z)
 
-  # - #
-	# X #
-	# - #
+  # ----- #
+	# Xcont #
+	# ----- #
   
-	for(j in 1:k){ 
-	  temp          <- mstep(x=X,wt=z[,j])
+	if(!is.null(Xcont)){
+    for(j in 1:k){ 
+	  temp          <- mstep(x=Xcont,wt=z[,j])
 	  muX[,j]       <- temp$center
 	  VarX[,,j]     <- temp$cov
 	  invVarX[,,j]  <- solve(temp$cov)
-	  PX[,j]        <- (2*pi)^(-p/2)*( ifelse(p>1,det(VarX[,,j]),VarX[,,j]) )^(-1/2)*exp(-1/2*mahalanobis(x=X, center=muX[,j], cov=invVarX[,,j], inverted=TRUE))                                   
+	  PXcont[,j]    <- (2*pi)^(-p/2)*( ifelse(p>1,det(VarX[,,j]),VarX[,,j]) )^(-1/2)*exp(-1/2*mahalanobis(x=Xcont, center=muX[,j], cov=invVarX[,,j], inverted=TRUE))                                   
+	  }
 	}
+    
+	# ----- #
+	# Xcate #
+	# ----- #
 	
+  if(!is.null(Xcate)){
+    for(u in 1:d)
+      alpha[[u]] <- (t(Xmod[[u]]) %*% z)/matrix(rep(nj,m[u]),nrow=m[u],byrow=T)
+    for(j in 1:k)
+      for(i in 1:n){
+        PXcate[i,j] <- 1
+        for(u in 1:d)
+          PXcate[i,j] <- PXcate[i,j]*dmultinom(Xmod[[u]][i,],size=1,prob=alpha[[u]][,j])
+      }
+  }
   
   # --- #
 	# Y|x #
@@ -369,7 +555,7 @@ while(check<1){
 	}
 	for(h in 1:k){
 	  if(familyY=="Poisson"){
-	    modelY      <- PoissonY(Y,X,weights=z[,h]) #,mustart=muY[,h]
+	    modelY      <- PoissonY(Y,X,weights=z[,h],method=method) #,mustart=muY[,h]
 	    beta0[h]    <- modelY$beta0
 	    beta1[,h]   <- modelY$beta1
 	    muY[,h]     <- exp(beta0[h] + X %*% beta1[,h])
@@ -381,7 +567,7 @@ while(check<1){
 	}
 	for(h in 1:k){
 	  if(familyY=="Binomial"){
-	    modelY      <- BinomialY(Y,X,weights=z[,h],m=mY) #,mustart=muY[,h]
+	    modelY      <- BinomialY(Y,X,weights=z[,h],m=mY,method=method) #,mustart=muY[,h]
 	    beta0[h]    <- modelY$beta0
 	    beta1[,h]   <- modelY$beta1
 	    muY[,h]     <- exp(beta0[h] + X %*% beta1[,h])/(1+exp(beta0[h] + X %*% beta1[,h]))
@@ -409,17 +595,17 @@ while(check<1){
   # Global - Observed-data log-likelihood # 
   # ------------------------------------- #
   
-	llvalues          <- log(rowSums(matrix(rep(prior,n),n,k,byrow=TRUE)*PY*PX)) 
-	loglik[iteration] <- sum(llvalues)
+	llvalues          <- log(rowSums(matrix(rep(prior,n),n,k,byrow=TRUE)*PY*PXcont*PXcate))
+  loglik[iteration] <- sum(llvalues)
   
   # ----------------------------------------------- #
 	# Aitkane's Acceleration-Based Stopping Criterion #
 	# ----------------------------------------------- #
 	
-	if(iteration>2 & k > 1){
+	if(iteration > 2 & k > 1){
 	  a[iteration-1]      <- (loglik[iteration]-loglik[iteration-1])/(loglik[iteration-1]-loglik[iteration-2])
 	  aloglik[iteration]  <- loglik[iteration-1]+(1/(1-a[iteration-1])*(loglik[iteration]-loglik[iteration-1]))
-	  if(abs(aloglik[iteration]-loglik[iteration])<threshold) 
+	  if(abs(aloglik[iteration]-loglik[iteration]) < threshold) 
 	    check <- 1 
 	}
 	
@@ -432,9 +618,9 @@ while(check<1){
 	# E-Step #
 	# ++++++ #
 	
-	z.num  <- matrix(rep(prior,n),n,k,byrow=TRUE)*PY*PX  # (n x k)
-	z.den  <- rowSums(z.num)                             # n-vector
-	z      <- z.num/matrix(rep(z.den,k),ncol=k)          # (n x k)
+	z.num  <- matrix(rep(prior,n),n,k,byrow=TRUE)*PY*PXcont*PXcate  # (n x k)
+	z.den  <- rowSums(z.num)                                        # n-vector
+	z      <- z.num/matrix(rep(z.den,k),ncol=k)                     # (n x k)
   
 }
 
@@ -445,6 +631,7 @@ finalloglik <- loglik[iteration-1]
 # Check on the EM-monotonicity                                            #
 # Plotting the values of the observed loglikelihood versus the iterations #
 # ----------------------------------------------------------------------- #
+
 cat("\n")
 if(loglikplot==TRUE & k>1){
 
@@ -465,17 +652,22 @@ if(loglikplot==TRUE & k>1){
 
 group <- apply(z,1,which.max)  
 
-###########################
-## Information criteria  ##
-###########################
+##########################
+## Information criteria ##
+##########################
     
 if(familyY=="Gaussian" | familyY=="Gamma")  
-  npar <- (k-1) + (p+2)*k + p*k + mixture:::ncovpar(modelname="VVV", p=p, G=k)  
+  npar <- (k-1) + p*k + k*(p*(p+1)/2) + k*(sum(m)-d) + (p+d+2)*k 
 if(familyY=="Binomial" | familyY=="Poisson")  
-  npar <- (k-1) + (p+1)*k + p*k + mixture:::ncovpar(modelname="VVV", p=p, G=k)  
+  npar <- (k-1) + p*k + k*(p*(p+1)/2) + k*(sum(m)-d) + (p+d+1)*k
     
 AIC       <- 2*finalloglik - npar*2
 BIC       <- 2*finalloglik - npar*log(n)
+AIC3      <- 2*finalloglik - npar*3  
+AICc      <- AIC - (2*npar*(npar+1))/(n-npar-1)
+AICu      <- AICc - n*log(n/(n-npar-1))
+CAIC      <- 2*finalloglik - npar*(1+log(n))
+AWE       <- 2*finalloglik - 2*npar*(3/2+log(n))   
 
 z.const    <- (z<10^(-322))*10^(-322)+(z>10^(-322))*z   # vincolo per evitare i NaN nel calcolo di tau*log(tau)
 hard.z     <- (matrix(rep(apply(z,1,max),k),n,k,byrow=F)==z)*1
@@ -483,22 +675,26 @@ ECM        <- sum(hard.z*log(z.const))
 ICL        <- BIC+ECM
 
 beta <- rbind(beta0,beta1)
-dimnames(beta)[[1]] <- paste("beta",0:p,sep="")
+dimnames(beta)[[1]] <- paste("beta",0:(p+d),sep="")
 dimnames(beta)[[2]] <- paste("comp",1:k,sep="")
 
 result <- list(
-  Y         = Y,            # Y: a numerical vector for the response variable
-  X         = X,            # X: a numerical vector for the unique covariate
-  familyY   = familyY,      # the exponential distribution used for Y|x 
-  p         = p,            # number of covariates
-  k         = k,            # number of groups
-  n         = n,            # sample size
+  Y         = Y,            
+  familyY   = familyY,       
+  X         = X,            
+  p         = p,
+  d         = d,
+  k         = k,            
+  n         = n,
+  m         = m,
   npar      = npar,
+  alpha     = alpha,
   mY        = mY,           # mY=1 for Bernoulli; mY>1 for Binomial
   prior     = prior,
   muX       = muX,
   VarX      = VarX,
-  PX        = PX,
+  PXcont    = PXcont,
+  PXcate    = PXcate,
   beta      = beta,
   muY       = muY,
   dispY     = dispY,
@@ -511,43 +707,35 @@ result <- list(
   group     = group,
   loglik    = finalloglik,
   AIC       = AIC,
+  AIC3      = AIC3,
+  AICc      = AICc,
+  AICu      = AICu,
+  AWE       = AWE,
+  CAIC      = CAIC,
   BIC       = BIC,
   ICL       = ICL,      # alla McNicholas
   call      = match.call()
 )
 
-class(result) <- "glgcwm"
+class(result) <- "glmcwm"
 return(result)
 
 alarm()
 
 }
 
-dgam <- function(x,mu,nu,log=FALSE){
-  
-  dgamma(x, shape=nu, scale = mu/nu, log = log)
-  
-}
-
-rgam <- function(x,mu,nu){
-  
-  rgamma(x, shape=nu, scale = mu/nu)
-  
-}
-
-
-
 #####################
 ## model Selection ##
 #####################
 
-gcwm <- function(
-  Y,  		                # numerical vector for the response variable
-  X,                       # (nxp) matrix for the covariates
+glmcwm <- function(
+  Y,  		                 # numerical vector for the response variable
+  Xcont=NULL,			                 # (nxp) matrix for the continuous covariates
+  Xcate=NULL,  		                 # (nxd) matrix for the categorical covariates
+  m=NULL,                  # m: number of levels for each categorical variable in Xcate (starting by 1)
   familyY = "Gaussian",    # the exponential distribution used for Y|x 
   k=2,                  # minimum number of groups
-  ic=c("BIC", "AIC", "ICL"),
-   mY=1,                         # mY=1 for Bernoulli; mY>1 for Binomial
+  mY=1,                         # mY=1 for Bernoulli; mY>1 for Binomial
   method="Nelder-Mead",         # optimization method
   initialization="random.soft", # initialization procedure: "random.soft", "random.hard", and "manua" 
   start.z=NULL,                 # (n x k)-matrix of soft or hard classification: it is used only if initialization="manual"		
@@ -557,20 +745,22 @@ gcwm <- function(
   seed=NULL
 )              
 {
-  ic <- match.arg(ic)
   call=match.call()
   
-  n <- length(X)
-  gridk    <- k
-  numk     <- length(gridk)
+  n     <- length(Y)
+  gridk <- k
+  numk  <- length(gridk)
   
-  IC <- array(0,c(numk,4),dimnames=list(paste(gridk,"groups",sep=" "),c("loglik","AIC","BIC","ICL")))
+  IC <- array(0,c(numk,9),dimnames=list(paste(gridk,"groups",sep=" "),c("loglik","AIC","AICc","AICu","AIC3","AWE","BIC","CAIC","ICL")))
 
   bestic <- -1e100
+  par <- list()
   for(i in 1:numk){
-    temp <- glgcwm(
-      Y=Y,  		                 
-      X=X,			                 
+    par[[i]] <- glmcwm2(
+      Y=Y,    	                 
+      Xcont=Xcont,			                 
+      Xcate=Xcate,  		                 
+      m=m,                 
       familyY = familyY,     
       k=gridk[i],                            
       mY=mY,                         
@@ -582,69 +772,24 @@ gcwm <- function(
       loglikplot=FALSE,
       seed=seed
     )
-    if (eval(parse(text=paste0("temp$",ic))) > bestic) {
-      besttemp <- temp
-      bestic <- eval(parse(text=paste0("temp$",ic)))
-    }
-    IC[i,1] <- temp$loglik
-    IC[i,2] <- temp$AIC
-    IC[i,3] <- temp$BIC
-    IC[i,4] <- temp$ICL
-    
   }
-
+  ic <- c("AIC", "AICc", "AICu", "AIC3", "AWE", "BIC", "CAIC", "ICL")
+  cr <- t(sapply(par,function(x) sapply(parse(text=paste0("x$",ic)),function(g) eval(g) )))
+  best <- apply(cr,2,function(x) c(which.max(x),max(x)))
+  colnames(best) <- ic
+  rownames(best) <- c("n. of groups","value")
+  
   cat("\n\n")
   cat("# ----------------------- #","\n")
   cat("# Model Selection Results #","\n")
   cat("# ----------------------- #","\n\n")
+  print(best)
   
-  cat("Best ",ic," value of",eval(parse(text=paste0("besttemp$",ic))),"obtained for k =",besttemp$k,"group(s)","\n\n")
-  if(loglikplot==TRUE & besttemp$k>1){
-    temp <- glgcwm(
-      Y=Y,    	                 
-      X=X,			                 
-      familyY = familyY,     
-      k=besttemp$k,                            
-      mY=mY,                         
-      method=method,                
-      initialization=initialization,  
-      start.z=start.z,                 		
-      iter.max=iter.max,                
-      threshold=threshold,            
-      loglikplot=loglikplot,
-      seed=seed
-    ) 
-  }
-  besttemp$call <- call
-  return(
-    c(besttemp,list(IC=IC))
+  
+  bestpar <- apply(best,2,function(x) par[[x[1]]])
+  
+   return(
+    list(best=best,bestpar=bestpar,par=par)
   )  
   
 }
-
-################################
-## Weighted Covariance Matrix ##
-################################
-
-mstep <- function(x,wt){
-  
-  if (is.data.frame(x)) 
-    x <- as.matrix(x)
-  else if (!is.matrix(x)) 
-    stop("'x' must be a matrix or a data frame")
-  if (!all(is.finite(x))) 
-    stop("'x' must contain finite values only")
-  p   <- ncol(x)
-  n   <- nrow(x)
-  mu  <- array(colSums(wt/sum(wt)*x),c(p),dimnames=list(paste("X.",1:p,sep="")))
-  cov <- array(crossprod(sqrt(wt/sum(wt))*(x-matrix(rep(mu,n),n,p,byrow=TRUE))),c(p,p),dimnames=list(paste("X.",1:p,sep=""),paste("X.",1:p,sep="")))
-  return(
-    list(
-      center = mu,
-      cov = cov      
-    )
-  )
-}
-
-
-

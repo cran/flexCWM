@@ -18,6 +18,6 @@ Ingrassia, S., Minotti, S. C., and Punzo, A. (2013). Model-based clustering via 
 
 }
 \seealso{
-\code{\link{flexCWM-package}}, \code{\link{gcwm}}
+\code{\link{flexCWM-package}}, \code{\link{glmcwm}}
 }
 \keyword{datasets}
