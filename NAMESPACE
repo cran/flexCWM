@@ -1,2 +1,2 @@
-export(glmcwm)
-import(numDeriv,mnormt,mclust,ellipse,mixture,Flury)
+export(cwm,summary.cwm,plot.cwm,modelget,print.cwm,ICget,print.cwm.IC,bestmodel)
+import(parallel,numDeriv,mnormt,mclust,ellipse,mixture,Flury,adehabitat,MASS,statmod)

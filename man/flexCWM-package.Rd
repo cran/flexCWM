@@ -1,6 +1,5 @@
 \name{flexCWM-package}
 \alias{flexCWM-package}
-\alias{flexCWM}
 \docType{package}
 \title{flexCWM - Flexible Cluster Weighted Modeling}
 \description{
@@ -8,19 +7,25 @@ This package allows for Flexible Cluster Weighted Modeling.
 }
 \details{
 \tabular{ll}{
-Package: \tab flexCWM\cr
+Package: \tab CWM\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2013-07-06\cr
+Version: \tab 1.3\cr
+Date: \tab 2014-12-13\cr
 License: \tab GNU-2\cr
 }
 }
 \references{
-Ingrassia, S., Minotti, S. C., and Vittadini, G. (2012). Local statistical modeling via the cluster-weighted approach with elliptical distributions. \emph{Journal of Classification}, \bold{29}(3), 363-401.
+Ingrassia, S., Minotti, S. C., and Vittadini, G. (2012). Local Statistical Modeling via the Cluster-Weighted Approach with Elliptical Distributions. \emph{Journal of Classification}, \bold{29}(3), 363-401.
 
-Ingrassia, S., Minotti, S. C., Punzo, A., and Vittadini, G. (2012). Generalized linear Gaussian cluster-weighted
-modeling. \emph{arXiv.org} e-print \bold{1211.1171}, available at: http://arxiv.org/abs/1211.1171.
+Ingrassia, S., Minotti, S. C., and Punzo, A. (2014). Model-based clustering via linear cluster-weighted models. \emph{Computational Statistics and Data Analysis}, \bold{71}, 159-182.
 
+Ingrassia, S., Punzo, A., and Vittadini, G. (2015). The Generalized Linear Mixed Cluster-Weighted Model. \emph{Journal of Classification}, \bold{32}(forthcoming)
+
+Punzo, A. (2014). Flexible Mixture Modeling with the Polynomial Gaussian Cluster-Weighted Model. \emph{Statistical Modelling}, \bold{14}(3), 257-291.
+
+%Punzo, A. and Ingrassia, S. (2015a). Clustering Bivariate Mixed-Type Data via the Cluster-Weighted Model. Computational Statistics, ..(..), ..-..
+
+%Punzo, A. and Ingrassia, S. (2015b). Parsimonious Generalized Linear Gaussian Cluster-Weighted Models. In T. Minerva, I. Morlini, and F. Palumbo (eds.), \emph{Statistical Models for Data Analysis}, Studies in Classification, Data Analysis and Knowledge Organization, pp. ..-.. Springer International Publishing, Switzerland.
 }
 \author{
 Mazza A., Punzo A., Ingrassia S.
@@ -34,5 +39,5 @@ Maintainer: Mazza Angelo <a.mazza@unict.it>
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{glmcwm}}, \code{\link{tourism}}
+\code{\link{cwm}}, \code{\link{tourism}}
 }
