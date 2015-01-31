@@ -60,7 +60,7 @@
   }
   return(list(lmodelY=lmodelY,dispY=as.vector(dispY),VarFunY=VarFunY,VarY=VarY,PY=PY))
 }
-.familyY.t <- function (familyY,k,data,Y,n,z,vY,t_df,formulaY,...){
+.familyY.student.t <- function (familyY,k,data,Y,n,z,vY,t_df,formulaY,...){
   beta <- VarFunY <- VarY <- muY <- PY <- dispY <-   sig  <- NULL
   lmodelY <- list()
   zvY <- z*vY
@@ -97,7 +97,6 @@
                            control=list(trace=FALSE,epsilon=1e-14)))
     #nuY[h]    <- MASS::gamma.shape(modelY,verbose=TRUE)$alpha
     nuY[h] <- optimize(f=f, interval=c(0,1000),Y=Y,modelY=modelY, weights=z[,h])$minimum
-    
     beta      <- rbind(beta,coef(modelY))
     muY[,h]   <- fitted(modelY)
     dispY[h]     <- 1/nuY[h]

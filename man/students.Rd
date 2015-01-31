@@ -25,3 +25,13 @@ Ingrassia, S., Minotti, S. C., and Punzo, A. (2014). Model-based clustering via 
 \code{\link{flexCWM-package}}, \code{\link{cwm}}
 }
 \keyword{datasets}
+\examples{
+data("students")
+attach(students)
+str(students)
+fit2 <- cwm(WEIGHT ~ HEIGHT + HEIGHT.F , Xnorm = cbind(HEIGHT, HEIGHT.F), k = 2, 
+  initialization = "kmeans", modelXnorm = "EEE")
+summary(fit2, concomitant = TRUE)
+plot(fit2)
+
+}

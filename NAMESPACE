@@ -1,2 +1,8 @@
-export(cwm,summary.cwm,plot.cwm,modelget,print.cwm,ICget,print.cwm.IC,bestmodel)
+export(cwm,whichBest,student.t,getIC,getBestModel,getPosterior,getCluster,
+       getParGLM,getPar,getParConcomitant,getSize,getParXpois,getParXnorm,getParXbin,getParXmult,getParPrior)
 import(parallel,numDeriv,mnormt,mclust,ellipse,mixture,Flury,adehabitat,MASS,statmod)
+S3method(summary,cwm)
+S3method(print,cwm)
+S3method(plot,cwm)
+S3method(print,cwm.IC)
+

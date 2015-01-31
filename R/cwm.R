@@ -1,21 +1,21 @@
 cwm <- function(
   formulaY=NULL,
-  familyY= gaussian, # the exponential distribution used for Y|x 
+  familyY= gaussian,
   data=NULL,
-  link,
   Xnorm=NULL,
-  modelXnorm=NULL,            # models to be fitted in the EM phase of clustering
   Xbin=NULL,
-  Xbtrials=NULL,
-  Xpois=NULL, #list of strings with names of covariates with Poisson distribuntion 
+  Xpois=NULL, 
   Xmult=NULL,
-  k=1:3,                  # groups
+  modelXnorm=NULL,
+  Xbtrials=NULL,
+  k=1:3,          
   initialization=c("random.soft","random.hard","kmeans","mclust","manual"),  # initialization procedure
-  start.z=NULL,                 # (n x k)-matrix of soft or hard classification: it is used only if initialization="manual"    
+  start.z=NULL,   
   seed=NULL,
-  maxR=1,                  #number of initial random points to be tested
-  iter.max=1000,                # maximum number of iterations in the EM-algorithm
-  threshold=1.0e-04,             # stopping rule in the Aitken rule
+  maxR=1,
+  iter.max=1000,
+  threshold=1.0e-04,
+  eps=1.0e-100,
   parallel=FALSE
 )              
 {
@@ -23,39 +23,18 @@ cwm <- function(
   if(is.null(formulaY) & is.null(Xnorm) & is.null(Xbin) & is.null(Xpois) & is.null(Xmult)) stop("No data were entered.")
   
   initialization<- match.arg(initialization)
+  lm <- list(k=k)
   # Get regression terms ----------------------------------------  
   if(!is.null(formulaY)) {
-    if (class(familyY)=="character"){
-      familyYname <- match.arg(familyY,c("gaussian","poisson","binomial","Gamma","t","inverse.gaussian"))
-      if (missing(link)){
-        familyY <- switch(familyYname,
-                          "Gamma" = Gamma(link="log"),
-                          "t" = gaussian(),
-                          "inverse.gaussian" = inverse.gaussian(link="log"),
-                          do.call(familyYname, list())
-        )
-      } 
-      else{
-        if (familyYname=="t") familyY <- do.call("gaussian",list(link=link))
-        else familyY <- do.call(familyYname,list(link=link))  
-      } 
-    } 
-    else {
-      if (is.function(family)) familyYname <- familyY()$family
-      else stop("Invalid value for argument 'familyY'")
-    }
+    familyY <- .familyY(familyY)
     if (is.null(data)){
-      data <- model.frame(as.formula(formulaY))
-    } else data <- model.frame(as.formula(formulaY),data)
-    Y <- as.matrix(model.response(data))
-    
-    
-    if(familyYname=="Binomial" & !is.factor(Y)) mY <- rowSums(Y)
-    else mY <- rep(1,nrow(Y))
-    
+      data <- get_all_vars(as.formula(formulaY))
+    } else data <-get_all_vars(as.formula(formulaY),data)
+    Y <- as.matrix(model.response(model.frame(formulaY,data)))
+    lm$familyY <- 1:length(familyY)
   } 
   else {
-    Y <- data <- familyYname <-NULL
+    Y <- data <- familyY <-NULL
   }
   
   n <- unlist(sapply(list(Y,Xnorm,Xpois,Xbin,Xmult), function(x)nrow(cbind(x))))
@@ -98,7 +77,7 @@ cwm <- function(
        is.null(Xnorm) & is.null(Xpois) & is.null(Xbin) & is.null(data)){  
     stop(paste0("when initialization is '",initialization, "', numeric variables are needed."))}
   
-  lm <- list(k=k)
+
   if(colXn>0){
     if(colXn==1){
       modelXnormNames <- c("E","V")
@@ -133,14 +112,15 @@ cwm <- function(
   }
   mm <- mm[order(mm$k),,drop=FALSE]
  job <- function(i){
-    cat(paste("\nEstimating model ",mm$modelXnorm[i]," with k=",mm$k[i]," ",sep=""))
-    cwm2(formulaY=formulaY, familyYname=familyYname,
-         data=data, Y=Y,
+    cat("\nEstimating model")
+    if (!is.null(mm$modelXnorm[i])) cat(paste0(" ",mm$modelXnorm[i]))
+    cat(" with k =",mm$k[i],"")
+    cwm2(formulaY=formulaY, data=data, Y=Y,
          Xnorm=Xnorm, Xmult=Xmult, Xbin=Xbin,Xpois=Xpois,
          Xbtrials=Xbtrials,n=n, m=m,colXn=colXn,colXp=colXp,colXb=colXb,colXm=colXm, Xmod=Xmod,
          k=mm$k[i], modelXnorm = mm$modelXnorm[i],           
-         familyY = familyY, mY=mY, method="Nelder-Mead", initialization=initialization,  
-         start.z=start.z, iter.max=iter.max, threshold=threshold, seed=seed, maxR=maxR)
+         familyY = familyY[[mm$familyY[i]]], method="Nelder-Mead", initialization=initialization,  
+         start.z=start.z, iter.max=iter.max, threshold=threshold, seed=seed, maxR=maxR,eps=eps)
   }
   if(parallel){
     cores <- getOption("cl.cores", detectCores())
@@ -159,7 +139,6 @@ cwm <- function(
   res <- structure(list(
     call=match.call(),
     formulaY=formulaY,
-    familyY=familyYname,
     data=data,
     concomitant=list(Xnorm=as.df(Xnorm,"Xnorm"),Xbin=as.df(Xbin,"Xbin"),Xpois=as.df(Xpois,"Xpois"),Xmult=as.df(Xmult,"Xmult")),
     Xbtrials=Xbtrials,
@@ -174,4 +153,9 @@ as.df <- function(ma,type){
     for(i in 1:ncol(ma)) attr(df[[i]],"type") <- type
     df
   } else NULL
+}
+student.t <- function(link = "identity"){
+  x <- gaussian(link)
+  x$family <- "student.t"
+  x
 }

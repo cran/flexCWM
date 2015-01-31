@@ -1,4 +1,3 @@
-
 .PX_multi <- function(colXm,Xmod,z,nj,m,k,n){
   alpha <- NULL
   if(colXm>0){
@@ -17,7 +16,7 @@
   } else PXmult <- 1
   list(PX=PXmult, alpha=alpha)
 }
-.PX_norm <- function(colXn,Xnorm,modelXnorm,z,k,n){
+.PX_norm <- function(colXn,Xnorm,modelXnorm,z,k,n,eps){
   if(colXn>0){
     PXnorm  <- array(1,c(n,k),dimnames=list(1:n,paste("comp.",1:k,sep="")))
     muX     <- array(0,c(colXn,k),dimnames=list(dimnames(Xnorm)[[2]],paste("comp.",1:k,sep="")))
@@ -26,9 +25,9 @@
       fitM <- mixture::m.step(data=Xnorm, covtype=modelXnorm, w=z, mtol=1e-10, mmax=10)
       for(j in 1:k){ 
         muX[,j]       <- fitM[[j]]$mu
-        Sigma[,,j]     <- fitM[[j]]$sigma
-        invVarX       <- fitM[[j]]$invSigma
-        PXnorm[,j]    <- (2*pi)^(-colXn/2)*(det(as.matrix(Sigma[,,j])))^(-1/2)*exp(-1/2*mahalanobis(x=Xnorm, center=muX[,j], cov=invVarX, inverted=TRUE))                                   
+        Sigma[,,j]    <- .fixSigma(fitM[[j]]$sigma,eps)
+        log.det       <- determinant(as.matrix(Sigma[,,j]),logarithm=TRUE)$modulus
+        PXnorm[,j]    <-exp(log((2*pi)^(-colXn/2)) + (-1/2)*log.det + (-1/2*mahalanobis(x=Xnorm, center=muX[,j], cov=Sigma[,,j], inverted=FALSE)))                                   
       }
     } else {
       fitM    <- mclust::mstep(modelName=substr(modelXnorm,1,1),data=Xnorm,z=z)
@@ -45,6 +44,11 @@
       muX <- Sigma <- NULL
   }
   list(PX=PXnorm,mu=muX,Sigma=Sigma)
+}
+.fixSigma<- function(sigma,eps){
+  es <- eigen(sigma)
+  es$values[es$values<eps] <- eps
+  es$vectors %*% diag(es$values) %*% t(es$vectors)
 }
 .PX_Poisson <- function(k,X,weights,n){
   if (!is.null(X)){

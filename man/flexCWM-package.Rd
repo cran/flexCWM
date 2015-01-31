@@ -3,14 +3,14 @@
 \docType{package}
 \title{flexCWM - Flexible Cluster Weighted Modeling}
 \description{
-This package allows for Flexible Cluster Weighted Modeling.
+Allows for maximum likelihood fitting of cluster-weighted models, a class of mixtures of regression models with random covariates. 
 }
 \details{
 \tabular{ll}{
 Package: \tab CWM\cr
 Type: \tab Package\cr
-Version: \tab 1.3\cr
-Date: \tab 2014-12-13\cr
+Version: \tab 1.4\cr
+Date: \tab 2015-01-31\cr
 License: \tab GNU-2\cr
 }
 }
@@ -39,5 +39,5 @@ Maintainer: Mazza Angelo <a.mazza@unict.it>
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{cwm}}, \code{\link{tourism}}
+\code{\link{cwm}}
 }

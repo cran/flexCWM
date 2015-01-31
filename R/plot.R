@@ -1,7 +1,7 @@
-plot.cwm <- function(x,criteria="BIC",regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which="all",...){
+plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which=NULL,criterion="BIC",k=NULL,modelXnorm=NULL,familyY=NULL,...){
   ctype <- match.arg(ctype,several.ok =TRUE)
-  criteria <- match.arg(criteria,.ICnames())
-  x <- modelget(x,criteria)
+  criterion <- match.arg(criterion,.ICnames())
+  x <- getBestModel(object=x,criterion=criterion,k=k,modelXnorm=modelXnorm,familyY=familyY)
   fp <- FALSE
   if (regr &  length(x$models[[1]]$GLModel)>0) {
     .plotregr(x,...)
@@ -15,7 +15,7 @@ plot.cwm <- function(x,criteria="BIC",regr=TRUE, ctype=c("Xnorm","Xbin","Xpois",
   for (i in ctype){
     df <-x$concomitant[[i]]
     if (!is.null(df))
-      for(j in if(which=="all") seq_len(ncol(df)) else which){
+      for(j in if(is.null(which)) seq_len(ncol(df)) else which){
         if (fp) readline("Press <Enter> to continue")
         fp <- TRUE
         if (i=="Xnorm") .plotConcNorm(x, as.matrix(df[j]),j,xlab=colnames(df[j]),main=main,col=col,lwd=lwd,lty=lty,...)
@@ -89,19 +89,21 @@ plot.cwm <- function(x,criteria="BIC",regr=TRUE, ctype=c("Xnorm","Xbin","Xpois",
   colp  <- col[x$models[[1]]$cluster]
   pchp  <- pch[x$models[[1]]$cluster]
   
-    if(ncol(as.matrix(x$data))==2){
-      plot(y=x$data[,1],x=x$data[,2],cex=cex, col=colp, pch = pchp,...)
-      xnew <- data.frame(seq(min(x$data[,2]), max(x$data[,2]), length.out = 100))
-      names(xnew) <- names(x$data)[2]
-      for (i in 1:x$models[[1]]$k){
-        yhat <- predict(x$models[[1]]$GLModel[[i]]$model,newdata=xnew,type="response")
-        lines(y=yhat, x=xnew[[1]], col=col[i],lwd=2)
-        
-        #yhat <- fitted(x$models[[1]]$GLModel[[i]]$model)[x$models[[1]]$cluster==i]
-        #ex   <- x$data[x$models[[1]]$cluster==i,2]
-        #lines(y=yhat, x=ex, col=col[i])
-      }
+  m <- x$models[[1]]$GLModel[[1]]$model
+  y <- model.response(model.frame(m$formula))
+  if (is.matrix(y)) y <- y[,-2, drop = FALSE]
+  data <- model.frame(m$formula)
+  data[attr(terms(data),"response")] <- NULL
+
+  if(ncol(data)==1){
+    plot(y=y,x=data[[1]],cex=cex, col=colp, pch = pchp,...)
+    xnew <- data.frame(seq(min(data), max(data), length.out = 100))
+    names(xnew) <- names(data)
+    for (i in 1:x$models[[1]]$k){
+      yhat <- predict(x$models[[1]]$GLModel[[i]]$model,newdata=xnew,type="response")
+      lines(y=yhat, x=xnew[[1]], col=col[i],lwd=2)
     }
-    if(ncol(as.matrix(x$data))>2) pairs(as.matrix(x$data),cex=cex, col=colp, pch = pch)
+  }
+  if(ncol(data)>1) pairs(cbind(y,as.matrix(data)),cex=cex, col=colp, pch = pch)
 
 }

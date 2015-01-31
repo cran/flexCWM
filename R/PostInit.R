@@ -6,7 +6,7 @@
   }
   if(initialization=="mclust"){
     #z <- gpcm(data=cbind(Y,Xnorm,Xpois,Xbin),G=k,mnames="VVV")$z
-    data <- cbind(Y,Xnorm,Xpois,Xbin)
+    data <- cbind(Y[,1],Xnorm,Xpois,Xbin)
     z <- Mclust(data=data,modelNames=ifelse(ncol(data)==1,"V","VVV"),G=k)$z
   } 
   if(initialization=="kmeans"){
