@@ -19,7 +19,7 @@ plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which
         if (fp) readline("Press <Enter> to continue")
         fp <- TRUE
         if (i=="Xnorm") .plotConcNorm(x, as.matrix(df[j]),j,xlab=colnames(df[j]),main=main,col=col,lwd=lwd,lty=lty,...)
-        else .plotConcBar(x=x, df=as.matrix(df[j]),ind=j,dtype=i,xlab=colnames(df[j]),type="b",main=main,col=col,lwd=lwd,lty=lty,...) 
+        else .plotConcBar(x=x, df=(df[j]),ind=j,dtype=i,xlab=colnames(df[j]),type="b",main=main,col=col,lwd=lwd,lty=lty,...) 
       }
     }
  }
@@ -54,19 +54,20 @@ plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which
   w <- x$models[[1]]$prior
   if (dtype=="Xbin"){
     n <- x$Xbtrials[ind]
-    data <- factor(df, levels=0:n)
+    data <- factor(as.matrix(df), levels=0:n)
     th <- matrix(nrow=k,ncol=n+1)
     for(i in 1:k) th[i,] <- w[i]* dbinom(0:n,n, prob=x$models[[1]]$concomitant$binomial.p[ind,i])
   }
   if (dtype=="Xpois"){
     n <- max(df)
-    data <- factor(df, levels=0:n)
+    data <- factor(as.matrix(df), levels=0:n)
     th <- matrix(nrow=k,ncol=n+1)
     for(i in 1:k) th[i,] <- w[i]*dpois(0:n,x$models[[1]]$concomitant$poisson.lambda[ind,i])
   }
   if (dtype=="Xmult"){
     data <- df
-    th <- w[i]*t(x$models[[1]]$concomitant$multinomial.prob[[ind]])
+    th <- matrix(nrow=k,ncol=1)
+    th <- w*t(x$models[[1]]$concomitant$multinomial.prob[[ind]])
   }
   dt <- table(data)
   dt <- dt/sum(dt)
@@ -76,7 +77,7 @@ plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which
   if (k>1) for(i in 1:k) lines(x=mp, y=th[i,],col=col[i],type=type,lwd=lwd,...)
 
 }
-.plotregr <- function(x, quantiles = c(0.75, 0.95),uncertanty=FALSE, col=c(2:(x$models[[1]]$k+1)),cex = 1, pch=NULL,type,...) {
+.plotregr <- function(x, quantiles = c(0.75, 0.95),uncertanty=FALSE, col=c(2:(x$models[[1]]$k+1)),cex = 1, pch=1,type,...) {
   if (uncertanty) {
     uncert <- 1 - apply(x$models[[1]]$posterior, 1, max)
     breaks <- quantile(uncert, probs = sort(quantiles))
@@ -94,7 +95,7 @@ plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which
   if (is.matrix(y)) y <- y[,-2, drop = FALSE]
   data <- model.frame(m$formula)
   data[attr(terms(data),"response")] <- NULL
-
+  data <- data[,sapply(data, is.numeric), drop=FALSE]
   if(ncol(data)==1){
     plot(y=y,x=data[[1]],cex=cex, col=colp, pch = pchp,...)
     xnew <- data.frame(seq(min(data), max(data), length.out = 100))
