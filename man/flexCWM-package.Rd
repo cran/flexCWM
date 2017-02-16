@@ -9,8 +9,8 @@ Allows for maximum likelihood fitting of cluster-weighted models, a class of mix
 \tabular{ll}{
 Package: \tab CWM\cr
 Type: \tab Package\cr
-Version: \tab 1.4\cr
-Date: \tab 2015-01-31\cr
+Version: \tab 1.7\cr
+Date: \tab 2017-02-14\cr
 License: \tab GNU-2\cr
 }
 }

@@ -1,6 +1,8 @@
 export(cwm,whichBest,student.t,getIC,getBestModel,getPosterior,getCluster,
-       getParGLM,getPar,getParConcomitant,getSize,getParXpois,getParXnorm,getParXbin,getParXmult,getParPrior)
-import(parallel,numDeriv,mnormt,mclust,ellipse,mixture,Flury,adehabitat,MASS,statmod)
+       getParGLM,getPar,getParConcomitant,getSize,getParXpois,getParXnorm,getParXbin,getParXmult,
+       getParPrior)
+import(stats,graphics,parallel,numDeriv,mclust,statmod)
+importFrom("ContaminatedMixt","m.step")
 S3method(summary,cwm)
 S3method(print,cwm)
 S3method(plot,cwm)

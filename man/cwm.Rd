@@ -8,7 +8,7 @@ cwm(formulaY = NULL, familyY = gaussian, data, Xnorm = NULL, Xbin = NULL,
   Xpois = NULL, Xmult = NULL, modelXnorm = NULL, Xbtrials = NULL, k = 1:3, 
   initialization = c("random.soft", "random.hard", "kmeans", "mclust", "manual"), 
   start.z = NULL, seed = NULL, maxR = 1, iter.max = 1000, threshold = 1.0e-04, 
-  eps = 1e-100, parallel = FALSE)
+  eps = 1e-100, parallel = FALSE,   pwarning = FALSE)
 }
                             
 %- maybe also 'usage' for other objects documented here.
@@ -50,10 +50,10 @@ cwm(formulaY = NULL, familyY = gaussian, data, Xnorm = NULL, Xbin = NULL,
     \item \code{"mclust"} 
     \item \code{"manual"}
   }
-  Default value is \code{"random.soft"}.
+   Default value is \code{"random.soft"}.
 }
   \item{start.z}{
-  matrix of soft or hard classification: it is used only if \code{initialization = "manual"}.
+  matrix of soft or hard classification: it is used only if \code{initialization = "manual"}.Only models with the same number of mixture components as the columns of this matrix will be fit.
 }
   \item{seed}{
  an optional scalar. It sets the seed for the random number generator, when random initializations are used; if \code{NULL}, current seed is not changed. Default value is \code{NULL}.
@@ -71,11 +71,10 @@ cwm(formulaY = NULL, familyY = gaussian, data, Xnorm = NULL, Xbin = NULL,
   \item{eps}{
   an optional scalar. It sets the smallest value for eigenvalues of covariance matrices for \code{Xnorm}. Default value is 1e-100.
 }
-
   \item{parallel}{
   When \code{TRUE}, the package \code{\link[parallel:parallel-package]{parallel}} is used for parallel computation. When several models are estimated, computational time is reduced. The number of cores to use may be set with the global option \code{cl.cores}; default value is detected using \code{\link[parallel:detectCores]{detectCores()}}.
-}
-
+} 
+  \item{pwarning}{When \code{TRUE}, warnings are printed.}
 }
 \details{When \code{familyY = binomial}, the response variable must be a matrix with two columns, where the first column is the number of "successes" and the second column is the number of "failures".  
 When several models have been estimated, methods \code{summary} and \code{print} consider the best model according to the information criterion in \code{criterion}, among the estimated models having a number of components among those in \code{k} an error distribution among those in \code{familyY} and a parsimonious model among those in \code{modelXnorm}.

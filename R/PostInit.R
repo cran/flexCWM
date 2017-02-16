@@ -23,5 +23,6 @@
   if(initialization=="manual"){ # z.start can be both soft and hard initialization
     z  <- start.z      # posterior probabilities (n x k) no-normalized
   }
+  z  = (z+0.0001)/rowSums(z+0.0001)
   z
 }

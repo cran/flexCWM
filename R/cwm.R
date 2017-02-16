@@ -16,7 +16,8 @@ cwm <- function(
   iter.max=1000,
   threshold=1.0e-04,
   eps=1.0e-100,
-  parallel=FALSE
+  parallel=FALSE,
+  pwarning=FALSE
 )              
 {
   # Preliminary checks and init ----------------------------------------------
@@ -120,14 +121,19 @@ cwm <- function(
          Xbtrials=Xbtrials,n=n, m=m,colXn=colXn,colXp=colXp,colXb=colXb,colXm=colXm, Xmod=Xmod,
          k=mm$k[i], modelXnorm = mm$modelXnorm[i],           
          familyY = familyY[[mm$familyY[i]]], method="Nelder-Mead", initialization=initialization,  
-         start.z=start.z, iter.max=iter.max, threshold=threshold, seed=seed, maxR=maxR,eps=eps)
-  }
+         start.z=start.z, iter.max=iter.max, threshold=threshold, seed=seed, maxR=maxR,eps=eps,pwarning=pwarning)
+ }
+  start.z <- start.z
   if(parallel){
     cores <- getOption("cl.cores", detectCores())
     cat(paste("Using",cores,"cores\n"))
-    cl <- makeCluster(cores)
+    cl <- makeCluster(cores,outfile="temp.out")
     #clusterExport(cl,envir=environment())
-    par <- parLapply(cl=cl,1:nrow(mm),function(i) job(i))
+    par <- parLapply(cl=cl,1:nrow(mm),function(i){
+      foo <- job(i)
+      gc()
+      foo
+      })
     stopCluster(cl)
   }
  else {

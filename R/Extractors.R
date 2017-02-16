@@ -7,11 +7,15 @@ getIC <- function(object,criteria){
   df <- data.frame(k=1:lm)
   for(i in 1:lm){
     obj <- object$models[[i]]
-    res[i,] <- sapply(1:lc, FUN=function(j) obj$IC[[criteria[j]]])
+    df$normal.model[i] <-df$familyY[i] <-NA
+    if(!is.null(obj$logLik)){
+      res[i,] <- sapply(1:lc, FUN=function(j) obj$IC[[criteria[j]]])
+      if(!is.null(obj$concomitant$normal.model)) df$normal.model[i] <- as.character(obj$concomitant$normal.model)
+      fam <- .getFamily(object,i)
+      if(!is.null(fam)) df$familyY[i] <-.getFamily(object,i)
+    }
+    
     df$k[i] <- obj$k
-    fam <- .getFamily(object,i)
-    if(!is.null(fam)) df$familyY[i] <-.getFamily(object,i)
-    if(!is.null(obj$concomitant$normal.model)) df$normal.model[i] <- as.character(obj$concomitant$normal.model)
   }
   attributes(res) <- c(attributes(res),df)
   class(res) <- "cwm.IC"
@@ -51,7 +55,14 @@ whichBest <- function(object, criteria=NULL, k=NULL, modelXnorm=NULL, familyY=NU
   if(!is.null(familyY))  w <- w & attr(a,"familyY") %in% familyY
   a <-a[w,,drop=FALSE]
   if (!any(w)) stop("No model matches the conditions specified.")
-  best <- strtoi(rownames(a)[sapply(1:length(criteria), function (i) which(t(a[,i])==max(a[,i])))])
+  foo <- integer(length(criteria))
+  for(i in 1:length(criteria)) {
+    roo <- which(t(a[,i])==max(a[,i], na.rm = TRUE))
+    if (length(roo) ==0) {
+      foo[i]  <- NaN 
+    }else { foo[i]  <-roo}
+  }
+  best <- strtoi(rownames(a)[foo])
   names(best) <- criteria
   best
 }

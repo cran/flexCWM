@@ -10,7 +10,7 @@ Plot method for cwm class objects.
 \usage{
  \method{plot}{cwm}(x, regr = TRUE, ctype = c("Xnorm","Xbin","Xpois",
                  "Xmult"), which = NULL, criterion = "BIC", k = NULL,
-                 modelXnorm = NULL, familyY = NULL, ...)
+                 modelXnorm = NULL, familyY = NULL,histargs=list(breaks=31),...)
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -28,6 +28,8 @@ An object of class \code{cwm}.
 \item{modelXnorm}{an optional vector of character strings indicating the parsimonious models to consider for \code{Xnorm}. If not specified, all the estimated models are considered. 
   }
 \item{familyY}{an optional vector of character strings indicating the conditional distribution of \eqn{Y} in each mixture component to consider. If not specified, all the estimated models are considered. 
+  }
+\item{histargs}{an optional list with \code{\link[graphics:hist]{hist}} arguments to be used in plot for normal concomitant variables.
   }
   \item{\dots}{further arguments for \code{\link[graphics:plot]{plot}}.
 }

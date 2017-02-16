@@ -1,4 +1,4 @@
-plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which=NULL,criterion="BIC",k=NULL,modelXnorm=NULL,familyY=NULL,...){
+plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which=NULL,criterion="BIC",k=NULL,modelXnorm=NULL,familyY=NULL,histargs=list(breaks=31),...){
   ctype <- match.arg(ctype,several.ok =TRUE)
   criterion <- match.arg(criterion,.ICnames())
   x <- getBestModel(object=x,criterion=criterion,k=k,modelXnorm=modelXnorm,familyY=familyY)
@@ -7,10 +7,10 @@ plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which
     .plotregr(x,...)
     fp <- TRUE
   }
-  .plotConc(x=x,ctype=ctype,which=which,fp=fp,...)
+  .plotConc(x=x,ctype=ctype,which=which,fp=fp,histargs=histargs,...)
  # if (i<length(df)) readline("Press <Enter> to continue")
 }  
-.plotConc <- function(x,ctype,which,fp,main="",col=c(2:(x$models[[1]]$k+1)),lwd=1,lty=2,...){
+.plotConc <- function(x,ctype,which,fp,main="",col=c(2:(x$models[[1]]$k+1)),lwd=1,lty=2,histargs,...){
   
   for (i in ctype){
     df <-x$concomitant[[i]]
@@ -18,21 +18,23 @@ plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which
       for(j in if(is.null(which)) seq_len(ncol(df)) else which){
         if (fp) readline("Press <Enter> to continue")
         fp <- TRUE
-        if (i=="Xnorm") .plotConcNorm(x, as.matrix(df[j]),j,xlab=colnames(df[j]),main=main,col=col,lwd=lwd,lty=lty,...)
+        if (i=="Xnorm") .plotConcNorm(x, as.matrix(df[j]),j,xlab=colnames(df[j]),main=main,col=col,lwd=lwd,lty=lty,histargs=histargs,...)
         else .plotConcBar(x=x, df=(df[j]),ind=j,dtype=i,xlab=colnames(df[j]),type="b",main=main,col=col,lwd=lwd,lty=lty,...) 
       }
     }
  }
 
-.plotConcNorm <- function(x,df,ind,ylab="density",ylim,col,lwd,lty,type,...){
+.plotConcNorm <- function(x,df,ind,ylab="density",ylim,col,lwd,lty,type,histargs,...){
   data <- df
   k <- x$models[[1]]$k
   group <- x$models[[1]]$cluster
   m <- x$models[[1]]$concomitant$normal.mu[ind,]
   s <- x$models[[1]]$concomitant$normal.Sigma[ind,ind,]
   w <- x$models[[1]]$prior
-  
-  h <- hist(data, breaks=31,plot=FALSE)
+  histargs$x=data
+  histargs$plot=FALSE
+  if (is.null(histargs$breaks)) histargs$breaks=31
+  h <-do.call(hist, args=histargs)
   xx <- seq(min(h$breaks),max(h$breaks),l=1001)
   yy <- lapply(1:k, function(i) w[i]*dnorm(xx,m[i],sqrt(s[i])))
   yline <- rowSums(sapply(1:k, function(i) yy[[i]]))
@@ -77,7 +79,7 @@ plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which
   if (k>1) for(i in 1:k) lines(x=mp, y=th[i,],col=col[i],type=type,lwd=lwd,...)
 
 }
-.plotregr <- function(x, quantiles = c(0.75, 0.95),uncertanty=FALSE, col=c(2:(x$models[[1]]$k+1)),cex = 1, pch=1,type,...) {
+.plotregr <- function(x, quantiles = c(0.75, 0.95),uncertanty=FALSE, col=c(2:(x$models[[1]]$k+1)),cex = 1, pch=rep(1,x$models[[1]]$k),type,...) {
   if (uncertanty) {
     uncert <- 1 - apply(x$models[[1]]$posterior, 1, max)
     breaks <- quantile(uncert, probs = sort(quantiles))
@@ -86,7 +88,7 @@ plot.cwm <- function(x,regr=TRUE, ctype=c("Xnorm","Xbin","Xpois","Xmult"), which
     I[uncert < breaks[1]] <- 1
     cex <- I*cex
   }
-
+  if (length(pch)==1) pch <- rep(pch,x$models[[1]]$k)
   colp  <- col[x$models[[1]]$cluster]
   pchp  <- pch[x$models[[1]]$cluster]
   

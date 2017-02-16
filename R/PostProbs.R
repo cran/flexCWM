@@ -22,13 +22,10 @@
     muX     <- array(0,c(colXn,k),dimnames=list(dimnames(Xnorm)[[2]],paste("comp.",1:k,sep="")))
     Sigma    <- array(0,c(colXn,colXn,k),dimnames=list(dimnames(Xnorm)[[2]],dimnames(Xnorm)[[2]],paste("comp.",1:k,sep="")))
     if(colXn>1){ #  More than one normal concomitant
-      fitM <- mixture::m.step(data=Xnorm, covtype=modelXnorm, w=z, mtol=1e-10, mmax=10)
-      for(j in 1:k){ 
-        muX[,j]       <- fitM[[j]]$mu
-        Sigma[,,j]    <- .fixSigma(fitM[[j]]$sigma,eps)
-        log.det       <- determinant(as.matrix(Sigma[,,j]),logarithm=TRUE)$modulus
-        PXnorm[,j]    <-exp(log((2*pi)^(-colXn/2)) + (-1/2)*log.det + (-1/2*mahalanobis(x=Xnorm, center=muX[,j], cov=Sigma[,,j], inverted=FALSE)))                                   
-      }
+      fitM <- ContaminatedMixt::m.step(X=Xnorm, modelname=modelXnorm, z=z, mtol=1e-25, mmax=10)
+      muX <- fitM$mu
+      Sigma  <- fitM$Sigma #.fixSigma(fitM$Sigma,eps)
+      PXnorm   <-fitM$px
     } else {
       fitM    <- mclust::mstep(modelName=substr(modelXnorm,1,1),data=Xnorm,z=z)
       muX[1,] <- fitM$parameters$mean
