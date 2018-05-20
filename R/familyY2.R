@@ -9,7 +9,7 @@
     muY       <- cbind(muY,fitted(modelY)) 
     dispY     <- rbind(dispY,sigma.hat^2)
     VarFunY   <- cbind(VarFunY,rep(1,n))
-    VarY      <- cbind(VarY,sigma.hat^2*rep(1,n))
+    VarY      <- cbind(VarY,as.vector(sigma.hat^2)*rep(1,n))
     PY        <- cbind(PY,dnorm(Y,mean=fitted(modelY),sd=sigma.hat))              
     lmodelY[[h]] <- modelY
   }

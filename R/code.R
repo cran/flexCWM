@@ -3,14 +3,14 @@
 #####################
 
 cwm2 <- function(formulaY, data, Y, Xnorm, Xmult, Xpois, Xbin,colXm,colXn,colXb,colXp,Xbtrials, n, m, Xmod, k, modelXnorm, familyY, 
-                    method, initialization, start.z, iter.max, threshold, loglikplot, seed,maxR,eps,pwarning) 
+                    method, initialization, start.z, iter.max, threshold, loglikplot, maxR,eps,pwarning) 
   # colXm number of factors in data
   # colXn number of Xnorm variables in data
   # m vector with number of levels of factors
 {
   t_df <- vY <- NULL       # only for the t distribution  
   familyYname <- familyY$family  
-  if(!is.null(seed)) set.seed(seed) 
+
   if(initialization=="manual" |initialization=="mclust") maxR <- 1
   
   
