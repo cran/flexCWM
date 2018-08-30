@@ -15,6 +15,8 @@ License: \tab GNU-2\cr
 }
 }
 \references{
+Mazza, A., Ingrassia, S., and Punzo, A. (2018). {flexCWM}: A Flexible Framework for Cluster-Weighted Models.  \emph{Journal of Statistical Software}, \bold{86}(2), 1-30.
+
 Ingrassia, S., Minotti, S. C., and Vittadini, G. (2012). Local Statistical Modeling via the Cluster-Weighted Approach with Elliptical Distributions. \emph{Journal of Classification}, \bold{29}(3), 363-401.
 
 Ingrassia, S., Minotti, S. C., and Punzo, A. (2014). Model-based clustering via linear cluster-weighted models. \emph{Computational Statistics and Data Analysis}, \bold{71}, 159-182.

@@ -1,4 +1,4 @@
-eb8e97c3484729369c240266c1904d5a *DESCRIPTION
+90aa87ff1ed6425c5f4c8cb59f374c37 *DESCRIPTION
 bc8f9fc1bfd2bdb8d6d83f15980ce155 *NAMESPACE
 92e70ac5f163752b0169613e50aa45e4 *R/Extractors.R
 359e0b424a7358bb696b9c5b49d2fc52 *R/Gamma.R
@@ -14,9 +14,10 @@ d32ffa60f978f430e1042e12ddb2bcb7 *R/PostProbs.R
 e2fcd5cc877d22ea5cf47377d0b8edef *R/t.R
 f25c7bbaf2270f02be765a46bbbfc1ea *data/ExCWM.RData
 b57b20c523fce94003b8d462fb1fc310 *data/students.RData
+3b1febfccf6eb1f739782ecbdd4aed83 *inst/CITATION
 9c4f3fbeae6100c66c54941e45a70102 *man/ExCWM.Rd
-b2673de3579def129f14259fc728c130 *man/cwm.Rd
+fef58e8475e96de2bf02b24660287baa *man/cwm.Rd
 d820e0ab6d3e142aa9137611505a938f *man/extractors.Rd
-fe3c236334c0e4fbce914527a9c37359 *man/flexCWM-package.Rd
+7379ad189e2335aba6105a554b52a245 *man/flexCWM-package.Rd
 00470aaf1f2a8e6ae1b362415688fe23 *man/plot.Rd
 47250f489966cbefdbc075eb9cc03934 *man/students.Rd

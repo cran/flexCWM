@@ -1,0 +1,26 @@
+bibentry(bibtype = "Article",
+  title        = "{flexCWM}: A Flexible Framework for Cluster-Weighted Models",
+  author       = c(person(given = "Angelo",
+                          family = "Mazza",
+                          email = "a.mazza@unict.it"),
+                   person(given = "Antonio",
+                          family = "Punzo",
+                          email = "antonio.punzo@unict.it"),
+                   person(given = "Salvatore",
+                          family = "Ingrassia",
+                          email = "s.ingrassia@unict.it")),
+  journal      = "Journal of Statistical Software",
+  year         = "2018",
+  volume       = "86",
+  number       = "2",
+  pages        = "1--30",
+  doi          = "10.18637/jss.v086.i02",
+
+  header       = "To cite flexCWM in publications use:",
+  textVersion  =
+  paste("Angelo Mazza, Antonio Punzo, Salvatore Ingrassia (2018).",
+        "flexCWM: A Flexible Framework for Cluster-Weighted Models.",
+        "Journal of Statistical Software, 86(2), 1-30.",
+        "doi:10.18637/jss.v086.i02")
+)
+
